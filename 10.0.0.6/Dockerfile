@@ -5,7 +5,7 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-FROM ubuntu:14.04
+FROM docker.io/ubuntu:14.04
 
 MAINTAINER Sam Rogers srogers@uk.ibm.com
 
@@ -39,6 +39,9 @@ COPY iib-license-check.sh /usr/local/bin/
 COPY iib_env.sh /usr/local/bin/
 RUN chmod +rx /usr/local/bin/*.sh
 
+# Set up user to be able to run all the commands in the entrypoint script without actually being root
+RUN env echo -e  "## Allow all users to run rsyslogd\n## There should only be the iibuser.\nALL ALL=(root) NOPASSWD: /usr/sbin/rsyslogd" > /etc/sudoers.d/ 50-rsyslogd-users.conf
+
 # Set BASH_ENV to source mqsiprofile when using docker exec bash -c
 ENV BASH_ENV=/usr/local/bin/iib_env.sh
 
@@ -46,6 +49,7 @@ ENV BASH_ENV=/usr/local/bin/iib_env.sh
 EXPOSE 4414 7800
 
 USER iibuser
+
 
 # Set entrypoint to run management script
 ENTRYPOINT ["iib_manage.sh"]
